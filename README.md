@@ -1,1 +1,1 @@
-D-Programming-Projects-omstu-alg-sem6
+omstu-alg-sem6
