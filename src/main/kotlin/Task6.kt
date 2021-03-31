@@ -71,14 +71,14 @@ fun main() {
                 "while Kotlin/JS (IR-based) in version 1.4, is considered alpha. Kotlin/Native Runtime (for e.g. Apple support) is considered beta."
 //    val text = "Hello world!"
 //    val text = "aaaaaaaaaaaaaaabbbbbbbccccccddddddeeeee"
+//    val text = "aabb"
 
-
-
-    val huffmanTree = makeHuffmanTree(text)
+    val huffmanTree = makeHuffmanTreeFromText(text)
     val encodedText = encodeText(text, huffmanTree)
     val uncodedText = uncodeText(encodedText, huffmanTree)
     println(encodedText)
     println(uncodedText)
+    makeHuffmanTreeFromDictionary(huffmanTree.getDictionary())
 }
 
 fun makeCharsMap(sourceText: String): TreeMap<Char, Int> {
@@ -94,30 +94,64 @@ fun makeCharsMap(sourceText: String): TreeMap<Char, Int> {
     return charsMap
 }
 
-fun makeHuffmanTree(text: String): HuffmanTree {
+fun makeHuffmanTreeFromText(text: String): HuffmanTree {
     val charsMap = makeCharsMap(text)
 
-    val huffmanTreeList = ArrayList<HuffmanTree>()
-    for (i in charsMap) {
-        huffmanTreeList.add(HuffmanTree(HuffmanTree.Node().apply {
-            char = i.key
-            value = i.value
-        }))
-    }
-    while (huffmanTreeList.size > 1) {
-        huffmanTreeList.sort()
-        huffmanTreeList.add(HuffmanTree(
-            HuffmanTree.Node().apply {
-                left = huffmanTreeList[0].head
-                right = huffmanTreeList[1].head
-
-                value = left!!.value + right!!.value
+    val huffmanTree = if (charsMap.size == 1) {
+        HuffmanTree(HuffmanTree.Node().apply {
+            left = HuffmanTree.Node().apply {
+                char = charsMap.firstKey()
+                value = charsMap[char]!!
             }
-        ))
-        huffmanTreeList.removeAt(0)
-        huffmanTreeList.removeAt(0)
+        })
+    } else {
+        val huffmanTreeList = ArrayList<HuffmanTree>()
+        for (i in charsMap) {
+            huffmanTreeList.add(HuffmanTree(HuffmanTree.Node().apply {
+                char = i.key
+                value = i.value
+            }))
+        }
+        while (huffmanTreeList.size > 1) {
+            huffmanTreeList.sort()
+            huffmanTreeList.add(HuffmanTree(
+                HuffmanTree.Node().apply {
+                    left = huffmanTreeList[0].head
+                    right = huffmanTreeList[1].head
+
+                    value = left!!.value + right!!.value
+                }
+            ))
+            huffmanTreeList.removeAt(0)
+            huffmanTreeList.removeAt(0)
+        }
+        huffmanTreeList.first()
     }
-    val huffmanTree = huffmanTreeList.first()
+
+    huffmanTree.print()
+    println()
+    return huffmanTree
+}
+fun makeHuffmanTreeFromDictionary(dictionary: TreeMap<Char, String>): HuffmanTree {
+    val huffmanTree = HuffmanTree(HuffmanTree.Node())
+
+    for (i in dictionary) {
+        var index = 0
+        var node = huffmanTree.head
+        while (index < i.value.length) {
+            node = if (i.value[index] == '0') {
+                if (node.left == null)
+                    node.left = HuffmanTree.Node()
+                node.left!!
+            } else {
+                if (node.right == null)
+                    node.right = HuffmanTree.Node()
+                node.right!!
+            }
+            index++
+        }
+        node.char = i.key
+    }
 
     huffmanTree.print()
     println()
